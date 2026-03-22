@@ -39,6 +39,9 @@ test_data.csv
 
 train_data.csv
 
+
+
+
 Model Exploration:
 
 solar_panel_2107_ts_split.ipynb - Linear Regression
@@ -49,6 +52,12 @@ solarpanels_prophet.ipynb - Prophet Model
 
 xgboost_2107_final.ipynb - XGBoost
 
+
+
+
+
 Old Files:
+
 NREL_data.ipynb - Initial NREL OEDI data exploration
+
 pvlib_test.ipynb - Initial attempt to use pvlib to calculate performance ratios
