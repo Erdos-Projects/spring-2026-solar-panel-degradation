@@ -14,11 +14,17 @@ The National Laboratory of the Rockies (formerly the National Renewable Energy L
 
 Methodology:
 Explored the following methods/models:
+
 -Linear Regression
+
 -XGBoost
+
 -Multi-Layer Perceptron
+
 -Random Forest
+
 -Prophet
+
 -LightGBM
 
 Results:
@@ -28,13 +34,19 @@ Models were assessed and compared via their mean square errors. Amongst these mo
 Description of Files:
 
 Training and Test Data from the OEDI 2107 system from the NREL Solar Data Prize Dataset. Contains cleaned environmental data and AC output data:
+
 test_data.csv
+
 train_data.csv
 
 Model Exploration:
+
 solar_panel_2107_ts_split.ipynb - Linear Regression
+
 SolarPanel_LightGBM.ipynb - LightGBM
+
 solarpanels_prophet.ipynb - Prophet Model
+
 xgboost_2107_final.ipynb - XGBoost
 
 Old Files:
