@@ -51,7 +51,7 @@ solarpanels_prophet.ipynb - Prophet Model
 
 xgboost_2107_final.ipynb - XGBoost
 
-
+SolarPanel_ModelComparison_MWOL - All models plus 3 baseline models
 
 
 
