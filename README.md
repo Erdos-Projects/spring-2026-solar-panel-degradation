@@ -24,12 +24,10 @@ Explored the following methods/models:
 
 -Random Forest
 
--Prophet
-
 -LightGBM
 
 **Results:**
-Models were assessed and compared via their mean square errors. Amongst these models, XGBoost was seen to perform the best with lowest mean squared error. The data for XGBoost was supplanted with additional features for the hour of the day and the month, which was seen to improve the model. Hyperparameter optimization via randomized search allowed us to find an optimal XGBoost model. This final model showed the most important feature by far was the irradiance with the hour of the day and month as the next most important features. This is consistent because the irradiance is how the solar panels actually produce any power. The hour of the day provides information about daily changes and the month allows the model to learn seasonal changes. The next most important feature after these was the air temperature, which corresponds to the efficiency of a solar panel being temperature dependent with higher efficiencies at lower temperatures. We did notice that XGBoost, though it does well with predicting the overall trends, routinely underestimates the peak power output in a day. 
+Models were assessed and compared via their mean square errors. Amongst these models, Random Forest was seen to perform the best with lowest mean squared error %. The data for XGBoost was supplanted with additional features for the hour of the day and the month, which was seen to improve the model. Hyperparameter optimization via randomized search allowed us to find an optimal XGBoost model. This final model showed the most important feature by far was the irradiance with the hour of the day and month as the next most important features. This is consistent because the irradiance is how the solar panels actually produce any power. The hour of the day provides information about daily changes and the month allows the model to learn seasonal changes. The next most important feature after these was the air temperature, which corresponds to the efficiency of a solar panel being temperature dependent with higher efficiencies at lower temperatures. We did notice that XGBoost, though it does well with predicting the overall trends, routinely underestimates the peak power output in a day. 
 
 -----------------------------------
 Description of Files:
