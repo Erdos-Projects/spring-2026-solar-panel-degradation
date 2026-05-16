@@ -1,62 +1,107 @@
-# spring-2026-solar-panel-degradation
-Team project: spring-2026-solar-panel-degradation
+# Solar Power 24-Hour Forecasting — System 2107, Arbuckle CA
 
-**Predicting Solar Panel Yields**
+Day-ahead solar power forecasting using NWP weather features and ML models,
+with financial analysis using CAISO real-time electricity prices (LMP).
 
-**Erdos Institute Data Science Bootcamp Spring 2026**
+---
 
-**Project Team: Varun Gudibanda, Hongki Jung, Jacob Kapita, Zhihao Mu, Huachen Sun**
+## Repository Structure
 
-**Motivation:**
-Solar facilities have found their way onto the power grids as a sustainable method of power generation. Prior to building a solar facility, predicting the AC power yield from the facility will assess whether that location is sufficient for the area’s power needs. Also, being able to predict the power that will be generated from currently built facilities will also help assess overall trends in power generation. Furthermore, solar energy is traded in day-ahead and real-time markets so accurate power predictions offer a competitive edge to market participants. We seek a data-driven framework by which we can use weather data at a particular location to make predictions of the AC power yield from a solar facility. In particular, given time series data of the weather, we want to forecast the AC power output over time.
+```
+solar-forecast-2107/
+│
+├── README.md                        ← You are here
+│
+├── 01_data_pipeline.py              ← STEP 1: Download data & build CSVs
+├── 02_model_comparison.ipynb        ← STEP 2: Train & evaluate all models
+├── 03_financial_analysis.ipynb      ← STEP 3: MWOL & bidding strategy
+│
+├── data/                            ← Created by 01_data_pipeline.py
+│   ├── df_train_features.csv        — Training features (2022-03-23→2023-11-09)
+│   ├── df_val_features.csv          — Validation features (2024-01-01→2024-05-31)
+│   ├── df_test_features.csv         — Test features (2024-06-01→2024-10-31)
+│   ├── lmp_2024.csv                 — CAISO Day-Ahead LMP prices
+│   ├── feature_list.txt             — Ordered list of 57 feature names
+│   └── data_audit.txt               — Sanity checks & row counts
+│
+└── figures/                         ← Saved by notebooks (auto-created)
+    ├── figT1_top3_together.png
+    ├── figF1_mwol_total.png
+    └── ...
+```
 
-**Dataset:**
-The National Laboratory of the Rockies (formerly the National Renewable Energy Laboratory) released the NREL 2023 Solar Data Prize Dataset which contains photovoltaic, environmental, and irradiance data along with their AC power output for a large number of solar facilities around the country. These datasets provide time series data in 15 minute increments for the ambient temperature, wind direction, wind speed, irradiance (power from the sun), and the AC power output. We select a particular dataset corresponding to a facility in Arbuckle, CA which has nearly 8 years of data from 2017-2024. Although the datasets provide the data in 15 minute increments, there is missing data for some of these features at particular times. We clean the data by filling gaps of less than 30 minutes with the previous time point’s data. Any other times with NaNs are deleted from the dataset. The number of deleted rows did not constitute a significant number of data points. 
+---
 
-**Methodology:**
-Explored the following methods/models:
+## How to Run
 
--Linear Regression
+### Step 1 — Download data and build feature CSVs
+```bash
+python 01_data_pipeline.py
+```
+This takes ~15 min (Open-Meteo download ~2 min, LMP download ~8 min).
+Run once. All subsequent steps load from `data/`.
 
--XGBoost
+### Step 2 — Train models and compare
+Open and run `02_model_comparison.ipynb` top to bottom.
+~5–10 min depending on `USE_MLP` setting.
 
--Multi-Layer Perceptron
+### Step 3 — Financial analysis
+Open and run `03_financial_analysis.ipynb` top to bottom.
+Requires `02_model_comparison.ipynb` to have been run in the same kernel session.
 
--Random Forest
+---
 
--LightGBM
+## Data Sources
 
-**Results:**
-Models were assessed and compared via their mean square errors. Amongst these models, Random Forest was seen to perform the best with lowest mean squared error %. The data for XGBoost was supplanted with additional features for the hour of the day and the month, which was seen to improve the model. Hyperparameter optimization via randomized search allowed us to find an optimal XGBoost model. This final model showed the most important feature by far was the irradiance with the hour of the day and month as the next most important features. This is consistent because the irradiance is how the solar panels actually produce any power. The hour of the day provides information about daily changes and the month allows the model to learn seasonal changes. The next most important feature after these was the air temperature, which corresponds to the efficiency of a solar panel being temperature dependent with higher efficiencies at lower temperatures. We did notice that XGBoost, though it does well with predicting the overall trends, routinely underestimates the peak power output in a day. 
+| Data | Source | Resolution |
+|---|---|---|
+| Solar meter (AC output) | [PVDAQ / OEDI (DOE)](https://oedi-data-lake.s3.amazonaws.com/pvdaq/2023-solar-data-prize/2107_OEDI/) | 15-min |
+| Weather forecasts | [Open-Meteo Previous Runs API](https://previous-runs-api.open-meteo.com) (GFS Seamless) | 15-min |
+| Electricity prices (LMP) | [CAISO OASIS API](http://oasis.caiso.com) (Day-Ahead Market, NP15 hub) | Hourly |
 
------------------------------------
-Description of Files:
+---
 
-Training and Test Data from the OEDI 2107 system from the NREL Solar Data Prize Dataset. Contains cleaned environmental data and AC output data:
+## Models
 
-test_data.csv
+| Model | Type | Test RMSE% | MWOL ($) |
+|---|---|---|---|
+| RandomForest | Ensemble (bagging) | ~15.7% | ~$738 |
+| XGBoost | Gradient boosting | ~16.9% | ~$767 |
+| LightGBM | Gradient boosting | ~17.3% | ~$793 |
+| Stacking | Meta-learner | ~16.6% | ~$1,096 |
+| MLP | Neural network | ~19.8% | ~$936 |
+| Ridge | Linear + L2 reg | ~18.1% | ~$1,624 |
+| LinearReg | OLS | ~18.1% | ~$1,624 |
+| Persistence | Baseline | ~25.2% | ~$1,161 |
+| Climatology | Baseline | ~20.6% | ~$1,166 |
+| SmartPersistence | Baseline | ~24.3% | ~$907 |
 
-train_data.csv
+---
 
+## Key Results
 
+- **Best model:** RandomForest — RMSE% 15.7%, MWOL $738 over Jun–Oct 2024
+- **vs best baseline:** Saves ~$428 MWOL compared to SmartPersistence
+- **Optimal bid strategy:** Apply a ~15–20% discount below forecast during
+  positive-LMP hours to reduce MWOL by a further 40–60%
+- **Cloud events:** July 16 type events (sudden afternoon cloud dropout)
+  account for the majority of residual error — irreducible with day-ahead NWP
 
+---
 
-Model Exploration:
+## Requirements
 
-solar_panel_2107_ts_split.ipynb - Linear Regression
+```bash
+pip install pandas numpy requests scikit-learn lightgbm xgboost matplotlib
+```
 
-SolarPanel_LightGBM.ipynb - LightGBM
+Python 3.10+ required.
 
-solarpanels_prophet.ipynb - Prophet Model
+---
 
-xgboost_2107_final.ipynb - XGBoost
+## System Details
 
-SolarPanel_ModelComparison_MWOL - All models plus 3 baseline models
-
-
-
-Old Files:
-
-NREL_data.ipynb - Initial NREL OEDI data exploration
-
-pvlib_test.ipynb - Initial attempt to use pvlib to calculate performance ratios
+- **Site:** PVDAQ System 2107, Arbuckle, California (38.9963°N, 122.1341°W)
+- **Capacity:** ~707 kW installed AC
+- **Meter:** Revenue-grade AC output at 15-minute resolution
+- **Forecast horizon:** 24 hours ahead (day-ahead market)
